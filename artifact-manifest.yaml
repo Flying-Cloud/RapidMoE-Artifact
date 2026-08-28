@@ -1,0 +1,21 @@
+{
+  "artifact": "RapidMoE EuroSys 2027 AE",
+  "version": "0.2.0-ae-review",
+  "target_badges": ["Available", "Functional"],
+  "models_exposed": ["DeepSeek-V3-671B"],
+  "api_surface": ["/v1/chat/completions"],
+  "functional_scope": {
+    "component_static_r": [1, 2],
+    "end_to_end": {
+      "mode": "dynamic",
+      "profile": "configs/ae/deepseek_v3_deployment_profile.json"
+    }
+  },
+  "excluded": [
+    "UMIA parameter-generation code and inputs",
+    "Qwen public entry points",
+    "full paper benchmark suites",
+    "model weights"
+  ],
+  "external_model_manifest": "artifact/model-deposit-manifest.json"
+}

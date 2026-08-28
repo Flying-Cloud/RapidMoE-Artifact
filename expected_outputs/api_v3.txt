@@ -1,0 +1,5 @@
+[RapidMoE deployment] {"layer_range": [3, 60], "layers": 58, "mode": "dynamic", ...}
+INFO: Application startup complete.
+"status": "PASS"
+"endpoint": "/v1/chat/completions"
+"content": "RapidMoE AE OK"

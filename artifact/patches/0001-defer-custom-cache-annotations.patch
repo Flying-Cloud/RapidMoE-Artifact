@@ -1,0 +1,9 @@
+--- a/ktransformers/models/custom_cache.py
++++ b/ktransformers/models/custom_cache.py
+@@ -4,6 +4,7 @@
+ Version      : 0.1.0
+ '''
++from __future__ import annotations
+ # Adapted from
+ # https://github.com/huggingface/transformers/blob/v4.41.2/src/transformers/cache_utils.py
+ # Copyright 2018- The Hugging Face team. All rights reserved.

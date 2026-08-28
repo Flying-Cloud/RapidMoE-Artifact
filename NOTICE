@@ -1,0 +1,7 @@
+RapidMoE EuroSys 2027 artifact, review version 0.2.0-ae.
+
+RapidMoE AE code and the scoped KTransformers-derived snapshot are licensed
+under Apache License 2.0. Bundled third-party components retain their own
+notices and license files. Model weights are not included in the code archive.
+The external DeepSeek-derived RESplit checkpoint retains the upstream MIT
+license; see THIRD_PARTY_NOTICES.md and artifact/MODELS.md.

@@ -1,0 +1,3 @@
+[PASS] repeated CUDA Graph replay decode comparison recorded
+[PASS] KExpertsCPU and RapidMoE speed statistics recorded
+[INFO] mean latency, standard deviation, throughput and speedup are observations

@@ -1,0 +1,14 @@
+.git
+release
+results
+**/__pycache__
+**/*.pyc
+**/*.so
+**/*.a
+**/*.o
+**/build
+**/.pytest_cache
+*.gguf
+*.safetensors
+*.log
+*.sqlite

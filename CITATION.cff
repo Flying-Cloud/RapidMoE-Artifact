@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "Please cite the RapidMoE paper and this artifact version; contact Wenxun Wang for artifact questions."
+title: "RapidMoE: EuroSys 2027 Artifact"
+type: software
+version: 0.2.0-ae-review
+date-released: 2026-08-28
+authors:
+  - family-names: "Wang"
+    given-names: "Wenxun"
+    email: "wx-wang23@mails.tsinghua.edu.cn"
+    affiliation: "Tsinghua University"
+  - family-names: "Ma"
+    given-names: "Likai"
+    email: "mlk22@mails.tsinghua.edu.cn"
+    affiliation: "Tsinghua University"
+  - family-names: "Huang"
+    given-names: "Zongle"
+    email: "huangzl23@mails.tsinghua.edu.cn"
+    affiliation: "Tsinghua University"
+  - family-names: "Tang"
+    given-names: "Chen"
+    email: "tangc20@mails.tsinghua.edu.cn"
+    affiliation: "Tsinghua University"
+  - family-names: "Liu"
+    given-names: "Yongpan"
+    email: "ypliu@tsinghua.edu.cn"
+    affiliation: "Tsinghua University"
+license: Apache-2.0

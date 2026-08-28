@@ -1,0 +1,13 @@
+{
+  "seed": 2027,
+  "device": "cuda:0",
+  "tokens": 2,
+  "experts": 8,
+  "top_k": 8,
+  "hidden_size": 256,
+  "intermediate_size": 256,
+  "combined_ggml_type": 348,
+  "atol": 0.00001,
+  "rtol": 0.00001,
+  "deployment_profile": "configs/ae/deepseek_v3_deployment_profile.json"
+}

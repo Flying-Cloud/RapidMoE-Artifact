@@ -1,0 +1,41 @@
+# AE overlay copied to release root
+.github/
+artifact/
+configs/ae/
+environment/
+expected_outputs/
+rapidmoe_ae/
+scripts/ae/
+tests/ae/
+
+# Root review and licensing metadata
+.dockerignore
+.gitignore
+CITATION.cff
+LICENSE
+NOTICE
+README.md
+THIRD_PARTY_NOTICES.md
+artifact-manifest.yaml
+
+# KTransformers production/build inputs copied under ktransformers-source/
+LICENSE
+MANIFEST.in
+README.md
+pyproject.toml
+setup.py
+requirements-local_chat.txt
+ktransformers/
+csrc/
+third_party/
+
+# Within ktransformers/ktransformers_ext only the imported Python Triton and
+# custom-Marlin utility modules are retained; duplicate/stale C++/CUDA is excluded.
+# The internal Qwen3 base/configuration modules remain solely because experts.py
+# imports them unconditionally; the AE exposes no Qwen3 entry, config, test, or model.
+
+# Explicit exclusions are enforced by the author-side packaging script:
+# .git, build products, caches, unrelated top-level tests, calibration, logs,
+# databases, notebooks, weights, profiling captures and embedded credentials.
+# Author-side planning, rehearsal history and diagnostic reports are retained
+# outside the evaluator-facing GitHub tree.

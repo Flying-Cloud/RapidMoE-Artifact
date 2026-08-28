@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "logical_model_family": ["DeepSeek-V3-671B"],
+  "checkpoint_file": "DeepSeek-V3-0324-RES.gguf",
+  "distribution": "external ModelScope transport parts; weights are not embedded in the GitHub artifact",
+  "observed_file_size_bytes": 427535921888,
+  "gguf_version": 3,
+  "architecture": "deepseek2",
+  "tensor_count": 1025,
+  "tensor_type_counts": {
+    "0:F32": 361,
+    "8:Q8_0": 490,
+    "350:IQ1_M_R4_RES_Q2_K": 116,
+    "351:IQ1_M_PLUS_Q4_K_R4": 58
+  },
+  "canonical_resplit_layout": true,
+  "sha256": "7c6c49fab0834fa8b218636de7b0f84676e93f57abb21b61dd25b11f742f5a99",
+  "license": "MIT",
+  "deposit_manifest": "artifact/model-deposit-manifest.json"
+}

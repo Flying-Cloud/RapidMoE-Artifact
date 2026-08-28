@@ -1,0 +1,8 @@
+[PASS] Combined GGUF loaded; WQ is on GPU and combined/WR backing is CPU mmap
+[PASS] Static Split Expert Routing r=1: 7 GPU experts
+[PASS] Static Split Expert Routing r=2: 6 GPU experts
+[PASS] Critical CPU residual branch executed
+[PASS] Non-critical GPU low-bit branch executed
+[PASS] CPU/GPU outputs merged without NaN or silent fallback
+[PASS] Repeated forward is deterministic
+[PASS] RapidMoE functional test completed

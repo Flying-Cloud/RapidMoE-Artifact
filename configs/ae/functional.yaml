@@ -1,0 +1,13 @@
+{
+  "seed": 2027,
+  "model": "DeepSeek-V3-671B",
+  "layer": 38,
+  "tensor_key": "blk.38",
+  "tokens": 1,
+  "top_k": 8,
+  "cpu_threads": 48,
+  "device": "cuda:0",
+  "routing_mode": "static",
+  "static_r_values": [1, 2],
+  "requirements": {"gpu_vram_gib": 24, "dram_gib": 64, "time_minutes": 20}
+}

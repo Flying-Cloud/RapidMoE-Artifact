@@ -1,0 +1,9 @@
+[PASS] Environment
+[PASS] WQ preprocessing and placement: GPU
+[PASS] WR preprocessing and placement: CPU
+[PASS] Routing invariants: no lost or duplicate token/expert pairs
+[PASS] UMIA dynamic selection: threshold changed r from ... to ...
+[PASS] GPU contribution merge condition executed
+[PASS] CPU contribution merge condition executed
+[PASS] Numerical error within tolerance
+[PASS] RapidMoE smoke test completed

@@ -1,0 +1,49 @@
+# linux/amd64 manifest of nvidia/cuda:12.2.2-devel-ubuntu22.04
+FROM nvidia/cuda:12.2.2-devel-ubuntu22.04@sha256:5f603101462baa721ff6ddc44af82f6e9ba7cbd92a424c9f9f348e6e9d6d64c3
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG MINICONDA=Miniconda3-py311_24.11.1-0-Linux-x86_64.sh
+ARG MINICONDA_SHA256=807774bae6cd87132094458217ebf713df436f64779faf9bb4c3d4b6615c1e3a
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      build-essential ca-certificates cmake curl git libnuma-dev libtbb-dev numactl pkg-config \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSLo /tmp/miniconda.sh "https://repo.anaconda.com/miniconda/${MINICONDA}" \
+    && echo "${MINICONDA_SHA256}  /tmp/miniconda.sh" | sha256sum -c - \
+    && bash /tmp/miniconda.sh -b -p /opt/conda \
+    && rm /tmp/miniconda.sh \
+    && /opt/conda/bin/conda clean -afy
+
+ENV PATH=/opt/conda/bin:/usr/local/cuda/bin:${PATH} \
+    CUDA_HOME=/usr/local/cuda \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    TORCH_CUDA_ARCH_LIST=8.0 \
+    CPU_INSTRUCT=AVX2 \
+    MAX_JOBS=8 \
+    RAPIDMOE_PYTHON=/opt/conda/bin/python \
+    RAPIDMOE_CUDA_HOME=/usr/local/cuda \
+    RAPIDMOE_KTRANSFORMERS_ROOT=/opt/rapidmoe/ktransformers-source \
+    RAPIDMOE_LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
+
+COPY environment/requirements.lock /tmp/requirements.lock
+RUN python -m pip install --no-cache-dir \
+      torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121 \
+    && python -m pip install --no-cache-dir -r /tmp/requirements.lock \
+    && python -m pip check
+
+COPY . /opt/rapidmoe
+WORKDIR /opt/rapidmoe
+RUN python -m pip install --no-cache-dir --no-build-isolation --no-deps \
+      ./ktransformers-source/third_party/custom_flashinfer \
+    && ./scripts/ae/install.sh \
+    && python -m pip check \
+    && ./scripts/ae/run_metadata_tests.sh
+
+LABEL org.opencontainers.image.title="RapidMoE EuroSys 2027 AE" \
+      org.opencontainers.image.description="DeepSeek-V3 RapidMoE Functional artifact environment" \
+      ai.rapidmoe.cuda-toolkit="12.2.2" \
+      ai.rapidmoe.torch="2.5.1+cu121" \
+      ai.rapidmoe.python="3.11"
+
+CMD ["bash"]

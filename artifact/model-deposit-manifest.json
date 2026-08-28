@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "repository": {
+    "provider": "ModelScope",
+    "repo_id": "FlyingCloud/DeepSeek-V3-0324-RapidMoE",
+    "revision": "32da28405b497f2ce09190395c007515f3a1ecd7",
+    "status": "public",
+    "primary_endpoint": "https://modelscope.cn",
+    "international_endpoint": "https://modelscope.ai",
+    "access_validation": {
+      "tested_at": "2026-08-28",
+      "primary_anonymous": "passed",
+      "international_anonymous": "not-mirrored-404"
+    }
+  },
+  "one_layer": {
+    "layer": 38,
+    "scope": "routed expert gate/up/down tensors only; not a complete model",
+    "files": [
+      {
+        "role": "rapidmoe_resplit",
+        "filename": "DeepSeek-V3-0324-Layer38-RES.gguf",
+        "local_subdirectory": "RES",
+        "size_bytes": 7052198528,
+        "sha256": "ff3705b3231fed48f61cf4c16f60dca311da37c9ed030c80a64bde27b9330ab3"
+      },
+      {
+        "role": "kexpertscpu_q4_k_m",
+        "filename": "DeepSeek-V3-0324-Layer38-Q4_K_M.gguf",
+        "local_subdirectory": "Q4_K_M",
+        "size_bytes": 6341788288,
+        "sha256": "c0f5c512bca5367036ba1dddd528ab2101468495956528f5cf857de9ef461058"
+      }
+    ]
+  },
+  "checkpoint": {
+    "logical_filename": "DeepSeek-V3-0324-RES.gguf",
+    "size_bytes": 427535921888,
+    "sha256": "7c6c49fab0834fa8b218636de7b0f84676e93f57abb21b61dd25b11f742f5a99",
+    "transport_chunk_size_bytes": 85899345920,
+    "parts": [
+      {
+        "filename": "DeepSeek-V3-0324-RES.gguf.part-00000",
+        "size_bytes": 85899345920,
+        "sha256": "0a77dee952ba4fc3b288294f76ab13f75ec1f0fb479c08c5520656dca9bf53bc"
+      },
+      {
+        "filename": "DeepSeek-V3-0324-RES.gguf.part-00001",
+        "size_bytes": 85899345920,
+        "sha256": "90b16cf9917d2f3ccb5a59b6c0ebaacea04c90f83d6908f27cf931062dbce45b"
+      },
+      {
+        "filename": "DeepSeek-V3-0324-RES.gguf.part-00002",
+        "size_bytes": 85899345920,
+        "sha256": "7a3996d2817f37c7048d2218a5527c5da9f1747689a3299d0167d3c7e072e5ba"
+      },
+      {
+        "filename": "DeepSeek-V3-0324-RES.gguf.part-00003",
+        "size_bytes": 85899345920,
+        "sha256": "70fea20556fbf4c953010ce32ab6b70302396e95fb8fe32d3cc0040c64e96f87"
+      },
+      {
+        "filename": "DeepSeek-V3-0324-RES.gguf.part-00004",
+        "size_bytes": 83938538208,
+        "sha256": "bb35c8818f4e513a67159dc7edfc9f5cd71cebf78bb3796fd3609eb684b15a74"
+      }
+    ]
+  },
+  "model_configuration": {
+    "provider": "ModelScope",
+    "repo_id": "deepseek-ai/DeepSeek-V3-0324",
+    "revision": "1c22c4cbeb9aa228df82f8115008c38f046224c1",
+    "files": [
+      "config.json",
+      "configuration_deepseek.py",
+      "modeling_deepseek.py",
+      "tokenizer.json",
+      "tokenizer_config.json"
+    ]
+  },
+  "licenses": {
+    "artifact_code": "Apache-2.0",
+    "deepseek_derived_checkpoint": "MIT"
+  }
+}

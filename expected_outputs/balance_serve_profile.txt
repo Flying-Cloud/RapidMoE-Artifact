@@ -1,0 +1,3 @@
+[RapidMoE deployment] {"dynamic_topk": false, "layers": 58, "mode": "static", "r": 1, "threshold_enabled": false, ...}
+[PASS] balance-serve V3 static configuration
+[PASS] balance-serve V3 profile auto-application for 58 layers

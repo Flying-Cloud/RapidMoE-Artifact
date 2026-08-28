@@ -1,0 +1,17 @@
+release/
+results/
+**/__pycache__/
+**/*.py[cod]
+**/*.so
+**/*.a
+**/*.o
+**/build/
+**/.pytest_cache/
+*.gguf
+*.safetensors
+*.log
+*.sqlite
+*.sif
+.env
+.venv/
+

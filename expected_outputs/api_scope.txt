@@ -1,0 +1,2 @@
+[PASS] scoped API routes: ['/v1/chat/completions', '/v1/models']
+[PASS] non-DeepSeek/model-mode mismatch rejected

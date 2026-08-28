@@ -1,0 +1,14 @@
+{
+  "scope": "paper-scale; not part of minimal Functional acceptance",
+  "model": "DeepSeek-V3-671B",
+  "gpus": 2,
+  "gpu_memory_gib_total": 160,
+  "dram_gib": 512,
+  "cpu_threads": 48,
+  "backend_type": "balance_serve",
+  "max_new_tokens": 256,
+  "cache_lens": 50001,
+  "chunk_size": 256,
+  "max_batch_size": 4,
+  "optimize_config": "ktransformers/optimize/optimize_rules/DeepSeek-V3-Chat-Hybrid-multi-gpu-serve.yaml"
+}
