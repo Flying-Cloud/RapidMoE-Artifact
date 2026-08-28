@@ -2,7 +2,7 @@
 
 This repository is the evaluation artifact for **“RapidMoE: Exploiting
 Cross-Asymmetry via Adaptive Residual Offloading for Large-Scale MoE
-Inference.”** It targets the EuroSys 2027 **Available + Functional** badges.
+Inference.”**
 
 RapidMoE splits routed MoE experts into a CPU residual path and a GPU low-bit
 path. The artifact provides static split routing, dynamic expert selection,
