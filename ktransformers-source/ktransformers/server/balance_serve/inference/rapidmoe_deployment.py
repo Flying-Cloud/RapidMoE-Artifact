@@ -1,8 +1,7 @@
 """Read-only RapidMoE deployment configuration for balance-serve.
 
-The sole public model is DeepSeek-V3.  It can run either static r=1 or dynamic
-selection from a frozen profile.  This module contains no profile generation,
-quality comparison, search, or dataset handling.
+The public DeepSeek-V3 endpoint supports fixed-r and dynamic expert selection.
+This module contains no profile generation, search, or dataset handling.
 """
 
 from __future__ import annotations
@@ -40,27 +39,34 @@ def _copy_scalar(tensor: torch.Tensor, value: float | int) -> None:
     tensor.copy_(torch.tensor([value], device=tensor.device, dtype=tensor.dtype))
 
 
-def configure_rapidmoe_layers(layers: list, mode: str, profile_path: str | None) -> dict:
+def configure_rapidmoe_layers(
+    layers: list,
+    mode: str,
+    profile_path: str | None,
+    static_r: int = 2,
+) -> dict:
     """Configure already-loaded KExpertsHybrid layers and return an audit record."""
     if len(layers) != 58:
         raise ValueError(f"expected 58 DeepSeek MoE layers, got {len(layers)}")
     if mode == "static":
         if profile_path:
             raise ValueError("static V3 mode must not receive a deployment profile")
+        if isinstance(static_r, bool) or not isinstance(static_r, int) or not 1 <= static_r <= 6:
+            raise ValueError("rapidmoe_static_r must be an integer in [1, 6]")
         for expert in layers:
             for name in ("flex_decode_topk", "flex_decode_idx", "flex_prefill_topk", "flex_prefill_idx"):
-                _copy_scalar(getattr(expert, name), 1)
-            _copy_scalar(expert.static_r_value, 1)
+                _copy_scalar(getattr(expert, name), static_r)
+            _copy_scalar(expert.static_r_value, static_r)
             # The prefill CUDA Graph path reads these Python-side split values
-            # while capturing, so bind them to the same static r=1 contract.
-            expert.flex_topk = 1
-            expert.prefill_topk = 1
-            expert.prefill_topk_phase1 = 1
+            # while capturing, so bind them to the same fixed-r contract.
+            expert.flex_topk = static_r
+            expert.prefill_topk = static_r
+            expert.prefill_topk_phase1 = static_r
             expert.prefill_topk_phase2 = 0
             expert.dynamic_topk = False
             expert.threshold_enabled = False
         return {
-            "mode": "static", "model": "DeepSeek-V3", "r": 1, "layers": 58,
+            "mode": "static", "model": "DeepSeek-V3", "r": static_r, "layers": 58,
             "dynamic_topk": False, "threshold_enabled": False,
             "static_guard": "per-forward-device-copy",
         }

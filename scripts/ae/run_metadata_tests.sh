@@ -2,6 +2,7 @@
 set -euo pipefail
 source "$(dirname "$0")/common.sh"
 "$AE_PYTHON" "$AE_ROOT/tests/ae/test_profile.py"
+"$AE_PYTHON" "$AE_ROOT/tests/ae/test_flexmoe_source_contract.py"
 "$AE_PYTHON" "$AE_ROOT/tests/ae/test_model_deposit.py"
 "$AE_PYTHON" "$AE_ROOT/tests/ae/test_model_downloader.py"
 "$AE_PYTHON" "$AE_ROOT/tests/ae/test_one_layer_downloader.py"

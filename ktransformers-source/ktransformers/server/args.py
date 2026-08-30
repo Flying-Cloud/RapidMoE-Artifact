@@ -120,6 +120,8 @@ class ArgumentParser:
                             help=argparse.SUPPRESS)
         parser.add_argument("--rapidmoe_mode", choices=("static", "dynamic"),
                             default=self.cfg.rapidmoe_mode)
+        parser.add_argument("--rapidmoe_static_r", type=int,
+                            default=self.cfg.rapidmoe_static_r)
         parser.add_argument("--rapidmoe_profile", type=str,
                             default=self.cfg.rapidmoe_profile)
 
@@ -160,6 +162,7 @@ class ArgumentParser:
         self.cfg.kvc2_metrics_port = free_ports[2]
 
         self.cfg.rapidmoe_mode = args.rapidmoe_mode
+        self.cfg.rapidmoe_static_r = args.rapidmoe_static_r
         self.cfg.rapidmoe_profile = args.rapidmoe_profile
         self.cfg.dynamic_topk = args.rapidmoe_mode == "dynamic"
         args.dynamic_topk = self.cfg.dynamic_topk

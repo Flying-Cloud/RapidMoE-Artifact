@@ -15,7 +15,7 @@ def main() -> int:
 
     static = json.loads((root / "configs/ae/deepseek_v3_static.json").read_text())
     assert static["model"].startswith("DeepSeek-V3")
-    assert static["mode"] == "static" and static["critical_experts_r"] == 1
+    assert static["mode"] == "static" and static["critical_experts_r"] == 2
     assert "profile" not in static
 
     dynamic = load_profile(root / "configs/ae/deepseek_v3_deployment_profile.json")
@@ -24,7 +24,7 @@ def main() -> int:
         for layer in range(3, 61):
             alpha, threshold = scalars_for_layer(dynamic, layer, phase)
             assert alpha > 0 and threshold > 0
-    print("[PASS] V3 static r=1 contract")
+    print("[PASS] V3 static r=2 contract")
     print("[PASS] V3 read-only dynamic profile covers layers 3..60")
     print("[PASS] no runtime parameter-generation input is required")
     return 0

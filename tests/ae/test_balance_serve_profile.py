@@ -32,20 +32,35 @@ def main() -> int:
     spec.loader.exec_module(module)
 
     static_layers = [MockExpert() for _ in range(58)]
-    record = module.configure_rapidmoe_layers(static_layers, "static", None)
-    assert record["r"] == 1
+    record = module.configure_rapidmoe_layers(static_layers, "static", None, 2)
+    assert record["r"] == 2
     assert record["dynamic_topk"] is False
     assert record["threshold_enabled"] is False
     assert record["static_guard"] == "per-forward-device-copy"
     assert record["model"] == "DeepSeek-V3"
     for expert in static_layers:
         assert not expert.dynamic_topk and not expert.threshold_enabled
-        assert expert.flex_topk == expert.prefill_topk == expert.prefill_topk_phase1 == 1
+        assert expert.flex_topk == expert.prefill_topk == expert.prefill_topk_phase1 == 2
         assert expert.prefill_topk_phase2 == 0
-        assert int(expert.static_r_value.item()) == 1
-        assert all(int(getattr(expert, name).item()) == 1 for name in (
+        assert int(expert.static_r_value.item()) == 2
+        assert all(int(getattr(expert, name).item()) == 2 for name in (
             "flex_decode_topk", "flex_decode_idx", "flex_prefill_topk", "flex_prefill_idx",
         ))
+
+    for invalid_r in (0, 7, 2.5, True):
+        try:
+            module.configure_rapidmoe_layers([MockExpert() for _ in range(58)], "static", None, invalid_r)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError(f"invalid static r accepted: {invalid_r!r}")
+
+    try:
+        module.configure_rapidmoe_layers(static_layers, "static", "profile.json", 2)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("static mode accepted a dynamic deployment profile")
 
     path = root / "configs/ae/deepseek_v3_deployment_profile.json"
     profile = json.loads(path.read_text())
@@ -59,7 +74,7 @@ def main() -> int:
             want_alpha = coefficient * profile["phase_scale"][phase]
             assert abs(float(getattr(expert, f"{phase}_alpha").item()) - want_alpha) < 1e-7
             assert abs(float(getattr(expert, f"{phase}_thre").item()) - profile["threshold"][phase]) < 1e-7
-    print("[PASS] balance-serve V3 static configuration")
+    print("[PASS] balance-serve V3 static r=2 configuration and validation")
     print("[PASS] balance-serve V3 profile auto-application for 58 layers")
     return 0
 

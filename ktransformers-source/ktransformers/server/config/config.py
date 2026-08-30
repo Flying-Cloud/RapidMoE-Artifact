@@ -213,4 +213,5 @@ class Config(metaclass=Singleton):
 
         self.dynamic_topk = False
         self.rapidmoe_mode = self.model.get("rapidmoe_mode", "static")
+        self.rapidmoe_static_r = self.model.get("rapidmoe_static_r", 2)
         self.rapidmoe_profile = self.model.get("rapidmoe_profile", None)

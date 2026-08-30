@@ -65,10 +65,10 @@ def apply_to_expert(expert, profile: dict, layer: int) -> None:
     expert.threshold_enabled = True
 
 
-def apply_static(expert, r: int = 1) -> None:
+def apply_static(expert, r: int = 2) -> None:
     """Configure the DeepSeek-V3 AE path with a fixed split point."""
-    if r != 1:
-        raise ValueError("the public DeepSeek-V3 static mode is fixed at r=1")
+    if r != 2:
+        raise ValueError("the public DeepSeek-V3 static mode is fixed at r=2")
     import torch
 
     for name in ("flex_decode_topk", "flex_decode_idx", "flex_prefill_topk", "flex_prefill_idx"):

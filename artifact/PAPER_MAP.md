@@ -10,6 +10,6 @@
 | Online expert selection | `dynamic_threshold` six-argument CUDA binding | `test_dynamic_threshold_kernel.py` and GPU smoke test | all configured `r` branches pass |
 | Preconfigured UMIA Runtime | `rapidmoe_ae/profile.py`, `rapidmoe_deployment.py`, frozen V3 JSON | metadata check and dynamic endpoint | profile applies to layers 3–60 |
 | Full UMIA parameter generation | not distributed | none | deliberately out of scope |
-| DeepSeek-V3 dynamic API | frozen dynamic profile, same endpoint | `run_deepseek_v3.sh`, then `smoke_api.py --model deepseek-v3` | HTTP 200 and readable completion |
+| DeepSeek-V3 API | frozen dynamic profile or fixed `r=2`, same endpoint | `run_deepseek_v3.sh --mode dynamic|static-r2`, then `smoke_api.py --model deepseek-v3` | HTTP 200 and exact smoke response |
 
-The scoped server registers only `/v1/models` for discovery and `/v1/chat/completions` for inference. The public Experiment 4 launcher accepts only model ID `deepseek-v3` and selects dynamic routing from the frozen profile.
+The scoped server registers only `/v1/models` for discovery and `/v1/chat/completions` for inference. The public Experiment 4 launcher accepts only model ID `deepseek-v3` and selects either frozen-profile dynamic routing or fixed `r=2` routing.

@@ -7,8 +7,10 @@ The CPU comparison JSON must identify CUDA Graph replay timing, five trials of
 `KExpertsCPU + Q4_K_M` and `KExpertsHybrid + RESplit` paths. Latency,
 throughput and speedup are observations, not fixed pass thresholds; this
 microbenchmark does not make a numerical-equivalence claim across the two
-quantization formats. The API JSON must report `status=PASS`, endpoint
-`/v1/chat/completions`, a nonempty `choices` list, and response text containing
-`RapidMoE AE OK`.
+quantization formats. Each Experiment 4 API JSON must report `status=PASS`,
+endpoint `/v1/chat/completions`, a nonempty `choices` list, and response text
+equal to `RapidMoE AE OK` after surrounding whitespace is removed. The server
+startup record must report either the frozen-profile `dynamic` mode or static
+mode with `r=2`, `dynamic_topk=false`, and `threshold_enabled=false`.
 
 Elapsed time, peak VRAM/RSS, token rate, TTFT, and TPOT vary with hardware and are informational. No paper throughput number is a Functional pass/fail condition.

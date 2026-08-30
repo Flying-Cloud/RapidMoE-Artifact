@@ -31,7 +31,7 @@ with opener.open(request, timeout=600) as response:
     payload = json.load(response)
 assert payload.get("choices"), payload
 content = payload["choices"][0]["message"]["content"].strip()
-assert "RapidMoE AE OK" in content, content
+assert content == "RapidMoE AE OK", content
 result = {
     "status": "PASS",
     "endpoint": "/v1/chat/completions",

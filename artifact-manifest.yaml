@@ -7,7 +7,8 @@
   "functional_scope": {
     "component_static_r": [1, 2],
     "end_to_end": {
-      "mode": "dynamic",
+      "modes": ["dynamic", "static-r2"],
+      "static_r": 2,
       "profile": "configs/ae/deepseek_v3_deployment_profile.json"
     }
   },

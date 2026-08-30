@@ -77,6 +77,7 @@ class ConfigArgs(BaseModel):
 
     dynamic_topk: bool = Field(None, description="Dynamic topk")
     rapidmoe_mode: str = Field("static", description="RapidMoE deployment mode: static or dynamic")
+    rapidmoe_static_r: int = Field(2, description="Fixed expert split for RapidMoE static mode")
     rapidmoe_profile: Optional[str] = Field(None, description="Read-only DeepSeek-V3 deployment profile")
 
 

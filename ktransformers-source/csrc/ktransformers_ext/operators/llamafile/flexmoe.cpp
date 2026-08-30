@@ -196,7 +196,9 @@ void FlexMOE::forward_flex(int qlen, int k, const uint64_t* expert_ids, const fl
     auto ne00 = config_.hidden_size;
     auto row_size_1 = ggml_row_size(config_.gate_ori_type, ne00);
     auto row_size_2 = ggml_row_size(config_.gate_res_type, ne00);
-    int  res  = 0;
+    // w12_projs already contains the GPU-computed base projection.  The CPU
+    // path must evaluate only the residual weights before the two are added.
+    int  res  = 1;
     backend->do_work_stealing_job(nth * k, nullptr, [&](int task_id) {
         int expert_idx = task_id / nth;
         uint64_t expert_id = expert_ids[expert_idx];

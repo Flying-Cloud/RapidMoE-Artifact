@@ -27,9 +27,11 @@ ENV PATH=/opt/conda/bin:/usr/local/cuda/bin:${PATH} \
     RAPIDMOE_LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libstdc++.so.6
 
 COPY environment/requirements.lock /tmp/requirements.lock
+COPY environment/requirements-download.lock /tmp/requirements-download.lock
 RUN python -m pip install --no-cache-dir \
       torch==2.5.1 --index-url https://download.pytorch.org/whl/cu121 \
     && python -m pip install --no-cache-dir -r /tmp/requirements.lock \
+    && python -m pip install --no-cache-dir -r /tmp/requirements-download.lock \
     && python -m pip check
 
 COPY . /opt/rapidmoe

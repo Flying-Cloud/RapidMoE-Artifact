@@ -57,6 +57,7 @@ class ModelRunner:
         self.bsz_tensor_buf = torch.empty((1, ),dtype=torch.int32, device=device)
         self.num_tokens_tensor_buf = torch.empty((1, ),dtype=torch.int32, device=device)
         self.dynamic_topk = Config().rapidmoe_mode == "dynamic"
+        self.rapidmoe_static_r = Config().rapidmoe_static_r
         
         
         if isinstance(self.model.model.layers[11].mlp.experts.generate_experts, KExpertsHybrid):
@@ -72,7 +73,8 @@ class ModelRunner:
         if not isinstance(self.model, KDeepseekV3ForCausalLM):
             raise ValueError("RapidMoE AE balance-serve supports only DeepSeek-V3")
         self.rapidmoe_deployment = configure_rapidmoe_layers(
-            self.layers_list, Config().rapidmoe_mode, Config().rapidmoe_profile
+            self.layers_list, Config().rapidmoe_mode, Config().rapidmoe_profile,
+            self.rapidmoe_static_r,
         )
         print("[RapidMoE deployment] " + json.dumps(self.rapidmoe_deployment, sort_keys=True))
 
@@ -121,7 +123,7 @@ class ModelRunner:
     
     def warmup(self):
         def capture_graphs(cuda_graph_idx):
-            capture_r = 0 if self.dynamic_topk else 1
+            capture_r = 0 if self.dynamic_topk else self.rapidmoe_static_r
             self.set_subgraph_idx(dynamic_topk=self.dynamic_topk, sub_graph_idx=capture_r)
             with torch.cuda.graph(self.graphs[cuda_graph_idx], pool=self.graph_memory_pool, stream=self.stream):
                 self.outputs_buf[cuda_graph_idx] = self.model(self.input[cuda_graph_idx], self.features_buf[cuda_graph_idx], self.bsz_tensor_buf, self.num_tokens_tensor_buf, self.page_idx_buf[cuda_graph_idx], self.page_offset_buf[cuda_graph_idx], cuda_graph_idx=cuda_graph_idx)   
@@ -174,7 +176,7 @@ class ModelRunner:
         
             torch.cuda.synchronize()
             for warm_up_iters in range(11):
-                warmup_r = 0 if self.dynamic_topk else 1
+                warmup_r = 0 if self.dynamic_topk else self.rapidmoe_static_r
                 self.set_subgraph_idx(self.dynamic_topk, warmup_r)
                 with torch.cuda.stream(self.stream):
                     self.outputs_buf[i] = self.model(self.input[i], self.features_buf[i], self.bsz_tensor_buf, self.num_tokens_tensor_buf, self.page_idx_buf[i], self.page_offset_buf[i], cuda_graph_idx=i)
@@ -197,7 +199,8 @@ class ModelRunner:
         # Graph capture changes the routing scratch tensors. Restore the public
         # deployment contract before accepting the first API request.
         self.rapidmoe_deployment = configure_rapidmoe_layers(
-            self.layers_list, Config().rapidmoe_mode, Config().rapidmoe_profile
+            self.layers_list, Config().rapidmoe_mode, Config().rapidmoe_profile,
+            self.rapidmoe_static_r,
         )
         
 

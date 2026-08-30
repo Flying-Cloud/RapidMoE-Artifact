@@ -6,16 +6,16 @@ Inference.”**
 
 RapidMoE splits routed MoE experts into a CPU residual path and a GPU low-bit
 path. The artifact provides static split routing, dynamic expert selection,
-real one-layer execution, a CPU/GPU kernel benchmark, and a full
-DeepSeek-V3-0324 dynamic endpoint.
+real one-layer execution, a CPU/GPU kernel benchmark, and full
+DeepSeek-V3-0324 dynamic and fixed-`r=2` endpoints.
 
 All commands below are run from the repository root.
 
 ## Hardware and software
 
-- Linux x86-64 with a CPU supporting **AVX-512** is recommended.
-- NVIDIA **Ampere** GPUs are recommended. The GPU experiments were validated
-  on Ampere GPUs and have not been tested on other GPU architectures.
+- Linux x86-64 with **AVX2** is required; **AVX-512** is recommended.
+- NVIDIA **Ampere** GPUs are recommended. The artifact was validated on A800
+  GPUs and has not been tested on other GPU architectures.
 - Verified software: Python 3.11, PyTorch 2.5.1+cu121, CUDA toolkit 12.2,
   and GCC/G++ 11.
 - The pinned environment is defined in
@@ -32,14 +32,14 @@ The complete 398.17 GiB checkpoint is used only by Experiment 4.
 | **1 — Metadata Check and Smoke Test (MWE)** | Validate metadata, frozen profiles, routing, dynamic selection, preprocessing and CPU/GPU merge | 1 Ampere GPU; <1 GiB test memory | Weight-free |
 | **2 — One-layer Functional (MWE)** | Execute one real DeepSeek-V3 MoE layer at static `r=1/2` | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 6.57 GiB RESplit layer |
 | **3 — CPU/GPU Kernel Benchmark (MWE)** | Compare KExpertsCPU/Q4_K_M and RapidMoE/RESplit with CUDA Graph replay | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 12.48 GiB layer pair |
-| **4 — End-to-end Model** | Validate dynamic selection through the OpenAI-compatible V3 API | 2×80 GiB GPUs, about 512 GiB host memory | 398.17 GiB RESplit |
+| **4 — End-to-end Model** | Validate dynamic and fixed-`r=2` selection through the OpenAI-compatible V3 API | 2×A800-80GB GPUs, 512 GB host memory, up to 48 physical CPU cores recommended | 398.17 GiB RESplit |
 
 ## Environment setup
 
 Build the container once:
 
 ```bash
-docker build --pull \
+docker build --pull --no-cache \
   -f environment/Dockerfile.ae \
   -t rapidmoe-ae:eurosys27 .
 ```
@@ -122,6 +122,15 @@ from five trials of 1,000 CUDA Graph replays after five warmups.
 
 ## 4. End-to-end Model
 
+Experiment 4 requires exclusive access to **2×A800-80GB GPUs** and a host with
+**512 GB RAM** (at least 500 GiB visible inside the container). Set
+`RAPIDMOE_CPU_THREADS` to `min(48, visible physical CPU cores)`; for example,
+use 32 when the container sees 32 physical cores. The default
+`cache_lens=4096`, `chunk_size=256`,
+`max_batch_size=4`, and `max_new_tokens=64` are the recommended AE settings.
+Allow 480 GiB of free disk for download/reconstruction, or about 550 GiB when
+retaining the container image and results alongside the checkpoint.
+
 Download and reconstruct the full RESplit checkpoint:
 
 ```bash
@@ -129,12 +138,23 @@ python3 scripts/ae/download_modelscope_checkpoint.py \
   --output-dir models/DeepSeek-V3-0324-Full
 
 export RAPIDMOE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf"
+export RAPIDMOE_CPU_THREADS=32  # use min(48, visible physical CPU cores)
 ```
 
-Start the dynamic DeepSeek-V3 server:
+Run the strict Experiment 4 preflight:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0,1 ./scripts/ae/run_deepseek_v3.sh
+./scripts/ae/check_environment.sh --experiment 4
+```
+
+Start one DeepSeek-V3 mode at a time:
+
+```bash
+# Frozen-profile dynamic selection
+CUDA_VISIBLE_DEVICES=0,1 ./scripts/ae/run_deepseek_v3.sh --mode dynamic
+
+# Fixed split: two critical experts on CPU
+CUDA_VISIBLE_DEVICES=0,1 ./scripts/ae/run_deepseek_v3.sh --mode static-r2
 ```
 
 After `Application startup complete`, run from another shell:
@@ -146,8 +166,10 @@ $RAPIDMOE_PYTHON scripts/ae/smoke_api.py \
   --output results/api_v3.json
 ```
 
-The API check passes when `/v1/chat/completions` returns a nonempty
-`choices` list containing `RapidMoE AE OK`.
+The API check passes when `/v1/chat/completions` returns exactly
+`RapidMoE AE OK` after surrounding whitespace is removed. Stop the first
+server before launching the other mode and use a distinct `--output` filename
+for each result.
 
 ## Code and experiment map
 

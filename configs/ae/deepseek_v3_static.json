@@ -2,7 +2,7 @@
   "schema_version": 1,
   "model": "DeepSeek-V3-671B",
   "mode": "static",
-  "critical_experts_r": 1,
+  "critical_experts_r": 2,
   "endpoint": "/v1/chat/completions",
   "notes": "No deployment profile is loaded and threshold arbitration is disabled."
 }

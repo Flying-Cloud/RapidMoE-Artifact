@@ -9288,6 +9288,7 @@ tests/ae/benchmark_cpu_baseline.py
 tests/ae/test_api_scope.py
 tests/ae/test_balance_serve_profile.py
 tests/ae/test_dynamic_threshold_kernel.py
+tests/ae/test_flexmoe_source_contract.py
 tests/ae/test_functional.py
 tests/ae/test_model_deposit.py
 tests/ae/test_model_downloader.py
