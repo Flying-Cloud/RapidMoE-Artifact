@@ -140,7 +140,7 @@ Experiment 4 requires exclusive access to **2×A800-80GB GPUs** and a host with
 **512 GB RAM** (at least 500 GiB visible inside the container). Set
 `RAPIDMOE_CPU_THREADS` to the number of visible physical CPU cores minus 8;
 subtract 16 instead when more host capacity should be reserved for the OS and
-GPU runtime. When unset, the launcher uses the minus-8 setting automatically.
+GPU runtime. The launcher defaults to 48 when the variable is unset.
 The default `cache_lens=4096`, `chunk_size=256`,
 `max_batch_size=4`, and `max_new_tokens=64` are the recommended AE settings.
 Allow 480 GiB of free disk for download/reconstruction, or about 550 GiB when
@@ -153,8 +153,7 @@ python3 scripts/ae/download_modelscope_checkpoint.py \
   --output-dir models/DeepSeek-V3-0324-Full
 
 export RAPIDMOE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf"
-PHYSICAL_CORES=$(lscpu -p=CORE,SOCKET | awk -F, '!/^#/ {seen[$1 FS $2]=1} END {print length(seen)}')
-export RAPIDMOE_CPU_THREADS=$((PHYSICAL_CORES - 8))  # use -16 for a larger reserve
+export RAPIDMOE_CPU_THREADS=48  # use PHYSICAL_CORES-8 or PHYSICAL_CORES-16
 ```
 
 Run the strict Experiment 4 preflight:

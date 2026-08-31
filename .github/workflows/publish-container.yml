@@ -18,6 +18,10 @@ permissions:
   contents: read
   packages: write
 
+concurrency:
+  group: publish-reference-container
+  cancel-in-progress: true
+
 jobs:
   publish:
     runs-on: ubuntu-22.04
