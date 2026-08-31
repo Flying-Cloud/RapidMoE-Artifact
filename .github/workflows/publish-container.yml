@@ -1,0 +1,52 @@
+name: Publish reference container
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".dockerignore"
+      - ".github/workflows/publish-container.yml"
+      - "environment/Dockerfile.ae"
+      - "environment/requirements*.lock"
+      - "ktransformers-source/**"
+      - "rapidmoe_ae/**"
+      - "scripts/**"
+      - "tests/**"
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - name: Check out artifact
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and publish linux/amd64 reference image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: environment/Dockerfile.ae
+          platforms: linux/amd64
+          push: true
+          tags: |
+            ghcr.io/flying-cloud/rapidmoe-ae:eurosys27
+            ghcr.io/flying-cloud/rapidmoe-ae:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/Flying-Cloud/RapidMoE-Artifact
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.licenses=Apache-2.0

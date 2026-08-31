@@ -13,7 +13,9 @@ All commands below are run from the repository root.
 
 ## Hardware and software
 
-- Linux x86-64 with **AVX2** is required; **AVX-512** is recommended.
+- An **Intel x86-64 CPU** is recommended. **AVX2, FMA, and F16C** are
+  required; AVX-512 is optional. The artifact was validated on Intel CPUs
+  with AVX2 support.
 - NVIDIA **Ampere** GPUs are recommended. The artifact was validated on A800/A100 GPUs.
 - Verified software: Python 3.11, PyTorch 2.5.1+cu121, CUDA toolkit 12.2,
   and GCC/G++ 11.
@@ -35,13 +37,26 @@ The complete 398.17 GiB checkpoint is used only by Experiment 4.
 
 ## Environment setup
 
-Build the container once:
+Building from the pinned Dockerfile is the recommended and default setup:
 
 ```bash
 docker build --pull --no-cache \
   -f environment/Dockerfile.ae \
   -t rapidmoe-ae:eurosys27 .
 ```
+
+As an optional reference, a prebuilt image is published on GHCR:
+
+```bash
+docker pull ghcr.io/flying-cloud/rapidmoe-ae:eurosys27
+docker tag ghcr.io/flying-cloud/rapidmoe-ae:eurosys27 rapidmoe-ae:eurosys27
+```
+
+The prebuilt image targets **linux/amd64**, requires an x86-64 CPU with
+**AVX2, FMA, and F16C**, and contains CUDA kernels for NVIDIA **A800/A100
+(`sm_80`)** GPUs. It is provided only as a convenience and reference; building
+from [`environment/Dockerfile.ae`](environment/Dockerfile.ae) remains the
+recommended evaluation path.
 
 The equivalent Apptainer workflow is documented in
 [`environment/README.md`](environment/README.md).
