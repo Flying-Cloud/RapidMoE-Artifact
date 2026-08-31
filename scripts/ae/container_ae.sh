@@ -197,8 +197,8 @@ case "$command" in
   exp2) run_exp2 ;;
   exp3) run_exp3 ;;
   mwe)
-    prepare_one_layer
     run_exp1
+    prepare_one_layer
     run_exp2
     run_exp3
     ;;
