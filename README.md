@@ -33,7 +33,7 @@ The complete 398.17 GiB checkpoint is used only by Experiment 4.
 | **1 — Metadata Check and Smoke Test (MWE)** | Validate metadata, frozen profiles, routing, dynamic selection, preprocessing and CPU/GPU merge | 1 Ampere GPU; <1 GiB test memory | Weight-free |
 | **2 — One-layer Functional (MWE)** | Execute one real DeepSeek-V3 MoE layer at static `r=1/2` | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 6.57 GiB RESplit layer |
 | **3 — CPU/GPU Kernel Benchmark (MWE)** | Compare KExpertsCPU/Q4_K_M and RapidMoE/RESplit with CUDA Graph replay | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 12.48 GiB layer pair |
-| **4 — End-to-end Model** | Validate dynamic and fixed-`r=2` selection through the OpenAI-compatible V3 API | 2×A800-80GB GPUs, 512 GB host memory, up to 48 physical CPU cores recommended | 398.17 GiB RESplit |
+| **4 — End-to-end Model** | Validate dynamic and fixed-`r=2` selection through the OpenAI-compatible V3 API | 2×A800-80GB GPUs, 512 GB host memory; reserve 8–16 visible physical CPU cores for the system | 398.17 GiB RESplit |
 
 ## Environment setup
 
@@ -138,9 +138,10 @@ from five trials of 1,000 CUDA Graph replays after five warmups.
 
 Experiment 4 requires exclusive access to **2×A800-80GB GPUs** and a host with
 **512 GB RAM** (at least 500 GiB visible inside the container). Set
-`RAPIDMOE_CPU_THREADS` to `min(48, visible physical CPU cores)`; for example,
-use 32 when the container sees 32 physical cores. The default
-`cache_lens=4096`, `chunk_size=256`,
+`RAPIDMOE_CPU_THREADS` to the number of visible physical CPU cores minus 8;
+subtract 16 instead when more host capacity should be reserved for the OS and
+GPU runtime. When unset, the launcher uses the minus-8 setting automatically.
+The default `cache_lens=4096`, `chunk_size=256`,
 `max_batch_size=4`, and `max_new_tokens=64` are the recommended AE settings.
 Allow 480 GiB of free disk for download/reconstruction, or about 550 GiB when
 retaining the container image and results alongside the checkpoint.
@@ -152,7 +153,8 @@ python3 scripts/ae/download_modelscope_checkpoint.py \
   --output-dir models/DeepSeek-V3-0324-Full
 
 export RAPIDMOE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf"
-export RAPIDMOE_CPU_THREADS=32  # use min(48, visible physical CPU cores)
+PHYSICAL_CORES=$(lscpu -p=CORE,SOCKET | awk -F, '!/^#/ {seen[$1 FS $2]=1} END {print length(seen)}')
+export RAPIDMOE_CPU_THREADS=$((PHYSICAL_CORES - 8))  # use -16 for a larger reserve
 ```
 
 Run the strict Experiment 4 preflight:

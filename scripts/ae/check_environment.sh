@@ -67,9 +67,9 @@ for index in range(min(2, torch.cuda.device_count())):
         print("[WARN] Experiment 4 was validated on A800-80GB; this GPU model is untested")
 PY
 
-  cpu_threads="${RAPIDMOE_CPU_THREADS:-48}"
-  [[ "$cpu_threads" =~ ^[1-9][0-9]*$ ]] || { echo "[FAIL] RAPIDMOE_CPU_THREADS must be a positive integer"; fail=1; cpu_threads=48; }
-  physical_cores=$(lscpu -p=CORE,SOCKET 2>/dev/null | awk -F, '!/^#/ {seen[$1 FS $2]=1} END {print length(seen)}')
+  cpu_threads="${RAPIDMOE_CPU_THREADS:-$(rapidmoe_default_cpu_threads)}"
+  [[ "$cpu_threads" =~ ^[1-9][0-9]*$ ]] || { echo "[FAIL] RAPIDMOE_CPU_THREADS must be a positive integer"; fail=1; cpu_threads=1; }
+  physical_cores="$(rapidmoe_visible_physical_cores)"
   if [[ "$physical_cores" =~ ^[1-9][0-9]*$ ]]; then
     (( cpu_threads <= physical_cores )) && echo "[PASS] CPU threads: ${cpu_threads} requested, ${physical_cores} physical cores visible" || { echo "[FAIL] RAPIDMOE_CPU_THREADS=${cpu_threads} oversubscribes ${physical_cores} physical cores"; fail=1; }
   else

@@ -9,8 +9,8 @@
 - OOM: Experiments 2 and 3 use compact layer-38 files and were observed below
   3 GiB allocated VRAM; an idle 8 GiB Ampere GPU is recommended. Experiment 4
   requires exclusive 2×A800-80GB GPUs and a 512 GB host. Keep
-  `RAPIDMOE_CPU_THREADS` at or below the visible physical-core count; use up
-  to 48 threads.
+  `RAPIDMOE_CPU_THREADS` to the visible physical-core count minus 8, or minus
+  16 to reserve more capacity for the OS and GPU runtime.
 - Missing expert tensor: the released combined GGUF must contain `blk.38.ffn_{gate,up,down}_exps.weight`.
 - NUMA placement can change Experiment 3 timing, but NUMA-aware hardware or
   explicit binding is not required and no fixed performance threshold is used.

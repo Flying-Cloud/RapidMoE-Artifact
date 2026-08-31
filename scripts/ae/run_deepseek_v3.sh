@@ -41,6 +41,7 @@ esac
 : "${RAPIDMOE_GGUF_PATH:?Set RAPIDMOE_GGUF_PATH to the DeepSeek-V3 RESplit GGUF directory}"
 export RAPIDMOE_STATE_DIR="${RAPIDMOE_STATE_DIR:-$AE_ROOT/results/server_state_v3_${mode//-/_}}"
 mkdir -p "$RAPIDMOE_STATE_DIR"
+cpu_threads="${RAPIDMOE_CPU_THREADS:-$(rapidmoe_default_cpu_threads)}"
 exec "$AE_PYTHON" -m ktransformers.server.main \
   --model_name deepseek-v3 \
   --port "${RAPIDMOE_PORT:-10002}" \
@@ -48,7 +49,7 @@ exec "$AE_PYTHON" -m ktransformers.server.main \
   --gguf_path "$RAPIDMOE_GGUF_PATH" \
   --optimize_config_path "$KT_ROOT/ktransformers/optimize/optimize_rules/DeepSeek-V3-Chat-Hybrid-multi-gpu-serve.yaml" \
   --max_new_tokens "${RAPIDMOE_MAX_NEW_TOKENS:-64}" \
-  --cpu_infer "${RAPIDMOE_CPU_THREADS:-48}" \
+  --cpu_infer "$cpu_threads" \
   --cache_lens "${RAPIDMOE_CACHE_LENS:-4096}" \
   --chunk_size "${RAPIDMOE_CHUNK_SIZE:-256}" \
   --max_batch_size "${RAPIDMOE_MAX_BATCH_SIZE:-4}" \

@@ -50,7 +50,8 @@ and results explicitly. The strict preflight checks GPU capacity, visible host
 memory, checkpoint byte length, and CPU-thread oversubscription:
 
 ```bash
-export RAPIDMOE_CPU_THREADS=32  # use min(48, visible physical CPU cores)
+PHYSICAL_CORES=$(lscpu -p=CORE,SOCKET | awk -F, '!/^#/ {seen[$1 FS $2]=1} END {print length(seen)}')
+export RAPIDMOE_CPU_THREADS=$((PHYSICAL_CORES - 8))  # use -16 for a larger reserve
 docker run --rm --gpus '"device=0,1"' --ipc=host --network=host \
   --ulimit memlock=-1:-1 \
   -e HOME=/tmp -e RAPIDMOE_CPU_THREADS \
