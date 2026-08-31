@@ -10,7 +10,9 @@ This artifact targets the EuroSys 2027 **Available + Functional** badges.
 | CPU/GPU overlap and merge | `FlexMOE.forward_*`, CUDA MoE kernels, `dynamic_add` | smoke merge conditions; functional nonzero branch evidence and merged finite output |
 | End-to-end generation | balance-serve plus DeepSeek multi-GPU YAML | dynamic and fixed-`r=2` five-graph captures and V3 `/v1/chat/completions` PASS |
 
-The package allowlist is `artifact/ALLOWLIST.txt`; the generated exact manifest and checksums are `artifact/FILES.txt` and `artifact/SHA256SUMS`.
+During evaluation, each artifact revision is identified by its Git commit. The
+final archival deposit will provide immutable versioning and archive-level
+integrity metadata.
 
 The release includes the scoped balance-serve server path required by the DeepSeek endpoint. The compatibility patch remains available for source variants that evaluate core operators without a built scheduler extension.
 

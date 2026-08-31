@@ -28,12 +28,17 @@ All commands below are run from the repository root.
 weight-free, while Experiments 2 and 3 use compact single-layer checkpoints.
 The complete 398.17 GiB checkpoint is used only by Experiment 4.
 
-| Experiment | Purpose | Recommended resources | Weights |
-|---|---|---|---|
-| **1 — Metadata Check and Smoke Test (MWE)** | Validate metadata, frozen profiles, routing, dynamic selection, preprocessing and CPU/GPU merge | 1 Ampere GPU; <1 GiB test memory | Weight-free |
-| **2 — One-layer Functional (MWE)** | Execute one real DeepSeek-V3 MoE layer at static `r=1/2` | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 6.57 GiB RESplit layer |
-| **3 — CPU/GPU Kernel Benchmark (MWE)** | Compare KExpertsCPU/Q4_K_M and RapidMoE/RESplit with CUDA Graph replay | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 12.48 GiB layer pair |
-| **4 — End-to-end Model** | Validate dynamic and fixed-`r=2` selection through the OpenAI-compatible V3 API | 2×A800-80GB GPUs, 512 GB host memory; reserve 8–16 visible physical CPU cores for the system | 398.17 GiB RESplit |
+| Experiment | Purpose | Recommended resources | Weights | Typical time |
+|---|---|---|---|---|
+| **1 — Metadata Check and Smoke Test (MWE)** | Validate metadata, frozen profiles, routing, dynamic selection, preprocessing and CPU/GPU merge | 1 Ampere GPU; <1 GiB test memory | Weight-free | 2–5 min |
+| **2 — One-layer Functional (MWE)** | Execute one real DeepSeek-V3 MoE layer at static `r=1/2` | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 6.57 GiB RESplit layer | 3–10 min after download |
+| **3 — CPU/GPU Kernel Benchmark (MWE)** | Compare KExpertsCPU/Q4_K_M and RapidMoE/RESplit with CUDA Graph replay | 1 Ampere GPU, 8 GiB VRAM, 16 GiB host memory | 12.48 GiB layer pair | 5–20 min after download |
+| **4 — End-to-end Model** | Validate dynamic and fixed-`r=2` selection through the OpenAI-compatible V3 API | 2×A800-80GB GPUs, 512 GB host memory; reserve 8–16 visible physical CPU cores for the system | 398.17 GiB RESplit | 20–60 min per mode after reconstruction |
+
+Times are approximate and depend on CPU, GPU, storage and system load. A clean
+Docker build typically takes 30–90 minutes. Downloading the one-layer files
+typically takes 10–60 minutes; downloading, reconstructing and hashing the full
+checkpoint can take 2–8 hours depending primarily on network and storage speed.
 
 ## Environment setup
 
@@ -58,16 +63,28 @@ The prebuilt image targets **linux/amd64**, requires an x86-64 CPU with
 from [`environment/Dockerfile.ae`](environment/Dockerfile.ae) remains the
 recommended evaluation path.
 
-The equivalent Apptainer workflow is documented in
-[`environment/README.md`](environment/README.md).
-
-For Experiments 2–4, set the DeepSeek-V3 configuration/tokenizer path:
+Create host directories for downloaded models and evaluator-owned results:
 
 ```bash
-export RAPIDMOE_PYTHON=/path/to/python3
-export RAPIDMOE_CUDA_HOME=/path/to/cuda-12.2
-export RAPIDMOE_MODEL_PATH=/path/to/DeepSeek-V3-config-and-tokenizer
+mkdir -p models results
 ```
+
+Download the pinned DeepSeek-V3 configuration and tokenizer inside the
+container. The host `models/` directory retains the files:
+
+```bash
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD/models:/models" \
+  rapidmoe-ae:eurosys27 \
+  ms-hub download deepseek-ai/DeepSeek-V3-0324 \
+    config.json configuration_deepseek.py modeling_deepseek.py \
+    tokenizer.json tokenizer_config.json \
+    --revision 1c22c4cbeb9aa228df82f8115008c38f046224c1 \
+    --local-dir /models/DeepSeek-V3-0324-config
+```
+
+The equivalent Apptainer workflow is documented in
+[`environment/README.md`](environment/README.md).
 
 ## 1. Metadata Check and Smoke Test (MWE)
 
@@ -102,17 +119,20 @@ Results are written under `results/gpu-smoke/` and `results/smoke.json`.
 Download the DeepSeek-V3 layer-38 RESplit checkpoint:
 
 ```bash
-python3 -m pip install 'modelscope-hub==0.2.0'
-python3 scripts/ae/download_one_layer_weights.py \
-  --output-dir models/DeepSeek-V3-0324-Layer38
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD/models:/models" \
+  rapidmoe-ae:eurosys27 \
+  python scripts/ae/download_one_layer_weights.py \
+    --output-dir /models/DeepSeek-V3-0324-Layer38
 
-export RAPIDMOE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Layer38/RES/DeepSeek-V3-0324-Layer38-RES.gguf"
-```
-
-Run:
-
-```bash
-CUDA_VISIBLE_DEVICES=0 ./scripts/ae/run_functional_test.sh
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  --gpus 'device=0' --ipc=host --network=none \
+  -e RAPIDMOE_MODEL_PATH=/models/DeepSeek-V3-0324-config \
+  -e RAPIDMOE_GGUF_PATH=/models/DeepSeek-V3-0324-Layer38/RES/DeepSeek-V3-0324-Layer38-RES.gguf \
+  -v "$PWD/models:/models:ro" \
+  -v "$PWD/results:/opt/rapidmoe/results" \
+  rapidmoe-ae:eurosys27 \
+  ./scripts/ae/run_functional_test.sh
 ```
 
 The test executes the real CPU residual and GPU low-bit branches at static
@@ -125,10 +145,15 @@ The one-layer downloader also provides the Q4_K_M checkpoint used by the CPU
 baseline:
 
 ```bash
-export RAPIDMOE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Layer38/RES/DeepSeek-V3-0324-Layer38-RES.gguf"
-export RAPIDMOE_BASELINE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Layer38/Q4_K_M/DeepSeek-V3-0324-Layer38-Q4_K_M.gguf"
-
-CUDA_VISIBLE_DEVICES=0 ./scripts/ae/run_cpu_baseline_benchmark.sh
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  --gpus 'device=0' --ipc=host --network=none \
+  -e RAPIDMOE_MODEL_PATH=/models/DeepSeek-V3-0324-config \
+  -e RAPIDMOE_GGUF_PATH=/models/DeepSeek-V3-0324-Layer38/RES/DeepSeek-V3-0324-Layer38-RES.gguf \
+  -e RAPIDMOE_BASELINE_GGUF_PATH=/models/DeepSeek-V3-0324-Layer38/Q4_K_M/DeepSeek-V3-0324-Layer38-Q4_K_M.gguf \
+  -v "$PWD/models:/models:ro" \
+  -v "$PWD/results:/opt/rapidmoe/results" \
+  rapidmoe-ae:eurosys27 \
+  ./scripts/ae/run_cpu_baseline_benchmark.sh
 ```
 
 The benchmark reports mean latency, standard deviation, throughput and speedup
@@ -149,36 +174,69 @@ retaining the container image and results alongside the checkpoint.
 Download and reconstruct the full RESplit checkpoint:
 
 ```bash
-python3 scripts/ae/download_modelscope_checkpoint.py \
-  --output-dir models/DeepSeek-V3-0324-Full
-
-export RAPIDMOE_GGUF_PATH="$PWD/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf"
-export RAPIDMOE_CPU_THREADS=48  # use PHYSICAL_CORES-8 or PHYSICAL_CORES-16
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  -v "$PWD/models:/models" \
+  rapidmoe-ae:eurosys27 \
+  python scripts/ae/download_modelscope_checkpoint.py \
+    --output-dir /models/DeepSeek-V3-0324-Full
 ```
 
 Run the strict Experiment 4 preflight:
 
 ```bash
-./scripts/ae/check_environment.sh --experiment 4
+export RAPIDMOE_CPU_THREADS=48  # use PHYSICAL_CORES-8 or PHYSICAL_CORES-16
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  --gpus '"device=0,1"' --ipc=host --network=none \
+  -e RAPIDMOE_CPU_THREADS \
+  -e RAPIDMOE_MODEL_PATH=/models/DeepSeek-V3-0324-config \
+  -e RAPIDMOE_GGUF_PATH=/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf \
+  -v "$PWD/models:/models:ro" \
+  -v "$PWD/results:/opt/rapidmoe/results" \
+  rapidmoe-ae:eurosys27 \
+  ./scripts/ae/check_environment.sh --experiment 4
 ```
 
 Start one DeepSeek-V3 mode at a time:
 
 ```bash
 # Frozen-profile dynamic selection
-CUDA_VISIBLE_DEVICES=0,1 ./scripts/ae/run_deepseek_v3.sh --mode dynamic
+docker run --rm --name rapidmoe-v3 \
+  --user "$(id -u):$(id -g)" \
+  --gpus '"device=0,1"' --ipc=host --network=host \
+  --ulimit memlock=-1:-1 -e HOME=/tmp \
+  -e RAPIDMOE_CPU_THREADS \
+  -e RAPIDMOE_MODEL_PATH=/models/DeepSeek-V3-0324-config \
+  -e RAPIDMOE_GGUF_PATH=/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf \
+  -v "$PWD/models:/models:ro" \
+  -v "$PWD/results:/opt/rapidmoe/results" \
+  rapidmoe-ae:eurosys27 \
+  ./scripts/ae/run_deepseek_v3.sh --mode dynamic
 
 # Fixed split: two critical experts on CPU
-CUDA_VISIBLE_DEVICES=0,1 ./scripts/ae/run_deepseek_v3.sh --mode static-r2
+docker run --rm --name rapidmoe-v3 \
+  --user "$(id -u):$(id -g)" \
+  --gpus '"device=0,1"' --ipc=host --network=host \
+  --ulimit memlock=-1:-1 -e HOME=/tmp \
+  -e RAPIDMOE_CPU_THREADS \
+  -e RAPIDMOE_MODEL_PATH=/models/DeepSeek-V3-0324-config \
+  -e RAPIDMOE_GGUF_PATH=/models/DeepSeek-V3-0324-Full/DeepSeek-V3-0324-RES.gguf \
+  -v "$PWD/models:/models:ro" \
+  -v "$PWD/results:/opt/rapidmoe/results" \
+  rapidmoe-ae:eurosys27 \
+  ./scripts/ae/run_deepseek_v3.sh --mode static-r2
 ```
 
 After `Application startup complete`, run from another shell:
 
 ```bash
-$RAPIDMOE_PYTHON scripts/ae/smoke_api.py \
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp \
+  --network=host \
+  -v "$PWD/results:/opt/rapidmoe/results" \
+  rapidmoe-ae:eurosys27 \
+  python scripts/ae/smoke_api.py \
   --base-url http://127.0.0.1:10002 \
   --model deepseek-v3 \
-  --output results/api_v3.json
+  --output /opt/rapidmoe/results/api_v3.json
 ```
 
 The API check passes when `/v1/chat/completions` returns exactly
