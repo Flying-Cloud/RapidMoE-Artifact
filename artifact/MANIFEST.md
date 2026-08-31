@@ -1,6 +1,6 @@
 # RapidMoE AE manifest
 
-This artifact targets the EuroSys 2027 **Available + Functional** badges. It does not target Reproduced.
+This artifact targets the EuroSys 2027 **Available + Functional** badges.
 
 | Paper component | Production implementation | AE evidence |
 |---|---|---|
@@ -14,4 +14,4 @@ The package allowlist is `artifact/ALLOWLIST.txt`; the generated exact manifest 
 
 The release includes the scoped balance-serve server path required by the DeepSeek endpoint. The compatibility patch remains available for source variants that evaluate core operators without a built scheduler extension.
 
-Excluded: calibration/profile-generation/frontier-search implementation and inputs, Qwen3 AE entries, full quality suites, ShareGPT, weights, build products, logs/databases, notebooks, duplicate extension sources, and unrelated KTransformers entry points. Vendored third-party source is retained unchanged for reliable builds, but no third-party example or test is an AE entry point. A small number of internal Qwen model definitions remain only because production modules import them unconditionally; there is no Qwen configuration, launcher, or test.
+Excluded: calibration/profile-generation/frontier-search/weight quantization and conversion. Vendored third-party source is retained unchanged for reliable builds, but no third-party example or test is an AE entry point.

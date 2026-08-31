@@ -6,7 +6,7 @@ Inference.”**
 
 RapidMoE splits routed MoE experts into a CPU residual path and a GPU low-bit
 path. The artifact provides static split routing, dynamic expert selection,
-real one-layer execution, a CPU/GPU kernel benchmark, and full
+real one-layer execution, a CPU/GPU kernel benchmark, and full end-to-end
 DeepSeek-V3-0324 dynamic and fixed-`r=2` endpoints.
 
 All commands below are run from the repository root.
@@ -14,8 +14,7 @@ All commands below are run from the repository root.
 ## Hardware and software
 
 - Linux x86-64 with **AVX2** is required; **AVX-512** is recommended.
-- NVIDIA **Ampere** GPUs are recommended. The artifact was validated on A800
-  GPUs and has not been tested on other GPU architectures.
+- NVIDIA **Ampere** GPUs are recommended. The artifact was validated on A800/A100 GPUs.
 - Verified software: Python 3.11, PyTorch 2.5.1+cu121, CUDA toolkit 12.2,
   and GCC/G++ 11.
 - The pinned environment is defined in

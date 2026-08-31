@@ -28,5 +28,5 @@
     0.007915901602245867
   ],
   "mutable": false,
-  "provenance": "Frozen DeepSeek-V3 deployment parameters. Parameter-generation inputs and code are not part of this artifact."
+  "provenance": "Example frozen DeepSeek-V3 deployment parameters. "
 }

@@ -12,5 +12,3 @@ endpoint `/v1/chat/completions`, a nonempty `choices` list, and response text
 equal to `RapidMoE AE OK` after surrounding whitespace is removed. The server
 startup record must report either the frozen-profile `dynamic` mode or static
 mode with `r=2`, `dynamic_topk=false`, and `threshold_enabled=false`.
-
-Elapsed time, peak VRAM/RSS, token rate, TTFT, and TPOT vary with hardware and are informational. No paper throughput number is a Functional pass/fail condition.
