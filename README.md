@@ -39,7 +39,7 @@ Times are approximate and depend on CPU, GPU, storage and system load. A clean
 Docker build typically takes 30–90 minutes. Downloading the one-layer files
 typically takes 10–60 minutes.
 
-The recommended evaluator path uses one host-side wrapper. It prepares mounts,
+The recommended path uses one host-side wrapper. It prepares mounts,
 invokes the container and writes outputs under `results/`:
 
 ```bash
@@ -85,7 +85,7 @@ The prebuilt image targets **linux/amd64**, requires an x86-64 CPU with
 from [`environment/Dockerfile.ae`](environment/Dockerfile.ae) remains the
 recommended evaluation path.
 
-Create host directories for downloaded models and evaluator-owned results:
+Create host directories for downloaded models and results:
 
 ```bash
 mkdir -p models results
@@ -120,7 +120,7 @@ This single experiment runs the metadata checks followed by the production
 CUDA routing, dynamic-threshold, RESplit preprocessing and merge kernels on
 small synthetic tensors.
 
-Run with the evaluator script:
+Run with the script:
 
 ```bash
 ./scripts/ae/container_ae.sh exp1
@@ -306,7 +306,7 @@ for each result.
 
 ## Code and experiment map
 
-| Implementation | Evaluator experiment |
+| Implementation | Experiment |
 |---|---|
 | `scripts/ae/container_ae.sh` | Host-side container workflow for Experiments 1–4 |
 | `rapidmoe_ae/profile.py`, frozen V3 profile | Experiment 1 |
